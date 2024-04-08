@@ -26,6 +26,12 @@ class Card:
     def __repr__(self):
         return self.__str__()
 
+    def __lt__(self, other):
+        return self.RANKS.index(self.rank) < self.RANKS.index(other.rank)
+
+    def __eq__(self, other):
+        return self.RANKS.index(self.rank) == other.RANKS.index(other.rank)
+
 class Deck:
     def __init__(self):
         cards = []
@@ -69,6 +75,110 @@ class PokerHand:
                 return False
         return True
 
+    @property
+    def if_pair(self):
+        found = 0
+        for i in range(len(self.hand)):
+            card = self.hand[i]
+            for j in range(i+1, len(self.hand)):
+                next_card = self.hand[j]
+                if card.rank == next_card.rank:
+                    found += 1
+        if found == 1:
+            return True
+        return False
+    @property
+    def if_pair2(self):
+        ranks = []
+        pairs_found = 0
+        for card in self.hand:
+            ranks.append(card.rank)
+        for rank in ranks:
+            if ranks.count(rank) == 2:
+                pairs_found += 1
+            if ranks.count(rank) == 3:
+                return False
+        if pairs_found == 2:
+            return True
+        return False
+
+    @property
+    def if_2_pair(self):
+        ranks = []
+        pairs_found = 0
+        for card in self.hand:
+            ranks.append(card.rank)
+        for rank in ranks:
+            if ranks.count(rank) == 2:
+                pairs_found += 1
+        if pairs_found == 4:
+            return True
+        return False
+
+    @property
+    def if_set(self):
+        ranks = []
+        pairs_found = 0
+        for card in self.hand:
+            ranks.append(card.rank)
+        for rank in ranks:
+            if ranks.count(rank) == 3:
+                pairs_found += 1
+            if ranks.count(rank) == 2:
+                return False
+        if pairs_found == 3:
+            return True
+        return False
+
+    @property
+    def if_quads(self):
+        ranks = []
+        pairs_found = 0
+        for card in self.hand:
+            ranks.append(card.rank)
+        for rank in ranks:
+            if ranks.count(rank) == 4:
+                pairs_found += 1
+        if pairs_found == 4:
+            return True
+        return False
+
+    @property
+    def if_full_house(self):
+        ranks = []
+        pairs_found = 0
+        for card in self.hand:
+            ranks.append(card.rank)
+        for rank in ranks:
+            if ranks.count(rank) == 3:
+                pairs_found += 1
+            if ranks.count(rank) == 2:
+                pairs_found += 1
+        if pairs_found == 5:
+            return True
+        return False
+
+    @property
+    def if_straight(self):
+        original_hand = self.hand.copy()
+        self.hand.sort()
+        distance = Card.RANKS.index(self.hand[-1].rank) - Card.RANKS.index(self.hand[0].rank)
+        self._hand = original_hand
+        return not self.if_pair and not self.if_2_pair and not self.if_quads and not self.if_set and distance == 4
+    @property
+    def if_straight_flush(self):
+        return self.if_straight and self.is_flush
+
+#pairs = 0
+#while True:
+#    deck = Deck()
+#    deck.shuffle()
+#    hand = PokerHand(deck)
+#    if hand.if_pair2:
+#        print(hand)
+#        pairs += 1
+#        if pairs == 10:
+#            break
 
 card = Card("♦", "K")
 print(card)
@@ -77,15 +187,17 @@ print(card2)
 cards_list = [card, card2]
 print(cards_list)
 
-deck = Deck()
-print(deck)
+#deck = Deck()
+#print(deck)
 #deck.cards.append(card) #You cannot append to a tuple
-deck.shuffle()
-print(deck)
+#deck.shuffle()
+#print(deck)
 
-hand = PokerHand(deck)
-print(f"A random poker hand is: {hand}")
-print(f"Is this hand a flush? {hand.is_flush}")
+#hand = PokerHand(deck)
+#print(f"A random poker hand is: {hand}")
+#print(f"Is this hand a flush? {hand.is_flush}")
+
+
 attempt = 0
 flushes = 0
 while True:
@@ -93,9 +205,16 @@ while True:
     deck = Deck()
     deck.shuffle()
     hand = PokerHand(deck)
-    if hand.is_flush == True:
+    if hand.if_straight_flush:
+        print(hand)
         flushes += 1
-        if flushes == 100:
+        if flushes == 10:
             break
+    if hand.if_pair and not hand.if_pair2:
+        print("bad code")
 
-print(flushes/attempt*100)
+prob = flushes / attempt * 100
+print(f"The probability of getting a pair in a poker hand is: {prob}%")
+#print(flushes/attempt*100)
+
+#is_pair()
